@@ -165,7 +165,7 @@ export const BoreLogPage: React.FC = () => {
           <SelectField
             label="Rotary Rig"
             required
-            options={rigs.map((r) => ({ id: r.id, name: `${r.name} (${r.code})` }))}
+            options={rigs.map((r) => ({ id: r.id, name: `${r.code}` }))}
             value={entry.rotaryRigId}
             onChange={(v) => update('rotaryRigId', v)}
           />

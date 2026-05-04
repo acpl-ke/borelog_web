@@ -45,11 +45,11 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <div className="login-hero">
-          <div className="eyebrow">Sign in · 01</div>
+          <div className="eyebrow">Sign in</div>
           <h1>
             Every bore, <em>recorded.</em>
           </h1>
-          <p>Capture pile foundation data right from the site, no paperwork required.</p>
+          <p>Capture Bore Log data right from the site, no paperwork required.</p>
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
@@ -96,6 +96,7 @@ export const LoginPage: React.FC = () => {
           </button>
 
           <div className="login-foot">FEC · v 2.4.1 · 2526</div>
+          <div className="login-foot">Developed by ARC CompSoft Pvt Ltd. <a className="login-foot" href='https://arc-india.com/' target='_blank'>info@arc-india.com</a></div>
         </form>
       </div>
     </div>
