@@ -78,6 +78,34 @@ export const BoreLogPage: React.FC = () => {
   const generalComplete = entry.dateOfBoringStarted && entry.dateOfConcreted && entry.rotaryRigId > 0;
   const boreComplete = entry.soilBore > 0 || entry.rockBore > 0;
 
+  // Liner & Reference Levels: complete when ALL its fields have non-zero / non-empty values.
+  // Numeric fields use > 0 (matches the pattern for boreComplete) and time fields are checked for non-empty strings.
+  const linerComplete =
+    entry.egl > 0 &&
+    entry.linerLength > 0 &&
+    entry.casingLength > 0 &&
+    entry.actualLength > 0 &&
+    entry.casingTop > 0 &&
+    entry.soilBoreTimeFrom !== '' &&
+    entry.soilBoreTimeTo !== '' &&
+    entry.soilBoreDepthFrom > 0 &&
+    entry.soilBoreDepthTo > 0 &&
+    entry.rockBoreTimeFrom !== '' &&
+    entry.rockBoreTimeTo !== '' &&
+    entry.rockBoreDepthFrom > 0 &&
+    entry.rockBoreDepthTo > 0 &&
+    entry.emptyBoreAfterConcrete > 0 &&
+    entry.concreteBoreAfterConcrete > 0;
+
+  // Site Personnel: complete when all three roles are selected
+  const personnelComplete =
+    !!entry.operatorId && entry.operatorId > 0 &&
+    !!entry.linerId && entry.linerId > 0 &&
+    !!entry.fitterId && entry.fitterId > 0;
+
+  // Remarks: complete when there's any non-empty remark text
+  const remarksComplete = entry.remarks.trim().length > 0;
+
   const handleSubmit = async () => {
     setSubmitting(true);
     setSaveError(null);
@@ -209,8 +237,13 @@ export const BoreLogPage: React.FC = () => {
           num="03"
           title="Liner & Reference Levels"
           subtitle="Casing, EGL, post-concrete"
+          isComplete={linerComplete}
           defaultOpen
         >
+          {/* 1. EGL (single, full-width) */}
+          <NumberField label="[A] EGL — Existing Ground Level" value={entry.egl} onChange={(v) => update('egl', v)} />
+
+          {/* 2-5. Liner Length, Casing Length, Actual, Casing Top */}
           <div className="group-label">Liner &amp; Casing</div>
           <div className="pair">
             <NumberField label="Liner Length" value={entry.linerLength} onChange={(v) => update('linerLength', v)} />
@@ -219,19 +252,7 @@ export const BoreLogPage: React.FC = () => {
             <NumberField label="Casing Top" value={entry.casingTop} onChange={(v) => update('casingTop', v)} />
           </div>
 
-          <div className="group-label">Reference Levels</div>
-          <NumberField label="[A] EGL — Existing Ground Level" value={entry.egl} onChange={(v) => update('egl', v)} />
-          <NumberField
-            label="Empty Bore (After Concrete)"
-            value={entry.emptyBoreAfterConcrete}
-            onChange={(v) => update('emptyBoreAfterConcrete', v)}
-          />
-          <NumberField
-            label="Concrete Bore (After Concrete)"
-            value={entry.concreteBoreAfterConcrete}
-            onChange={(v) => update('concreteBoreAfterConcrete', v)}
-          />
-
+          {/* 6. Soil Bore From/To group */}
           <div className="group-label">Time &amp; Depth Log</div>
           <div className="td-block">
             <div className="td-title">
@@ -247,19 +268,23 @@ export const BoreLogPage: React.FC = () => {
               <input
                 type="number"
                 step="0.001"
-                value={entry.soilBoreDepthFrom}
-                onChange={(e) => update('soilBoreDepthFrom', parseFloat(e.target.value) || 0)}
+                placeholder="0.000"
+                value={entry.soilBoreDepthFrom === 0 ? '' : entry.soilBoreDepthFrom}
+                onChange={(e) => update('soilBoreDepthFrom', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                 inputMode="decimal"
               />
               <input
                 type="number"
                 step="0.001"
-                value={entry.soilBoreDepthTo}
-                onChange={(e) => update('soilBoreDepthTo', parseFloat(e.target.value) || 0)}
+                placeholder="0.000"
+                value={entry.soilBoreDepthTo === 0 ? '' : entry.soilBoreDepthTo}
+                onChange={(e) => update('soilBoreDepthTo', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                 inputMode="decimal"
               />
             </div>
           </div>
+
+          {/* 7. Rock Bore From/To group */}
           <div className="td-block">
             <div className="td-title">
               Rock Bore <span className="badge">From → To</span>
@@ -274,30 +299,55 @@ export const BoreLogPage: React.FC = () => {
               <input
                 type="number"
                 step="0.001"
-                value={entry.rockBoreDepthFrom}
-                onChange={(e) => update('rockBoreDepthFrom', parseFloat(e.target.value) || 0)}
+                placeholder="0.000"
+                value={entry.rockBoreDepthFrom === 0 ? '' : entry.rockBoreDepthFrom}
+                onChange={(e) => update('rockBoreDepthFrom', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                 inputMode="decimal"
               />
               <input
                 type="number"
                 step="0.001"
-                value={entry.rockBoreDepthTo}
-                onChange={(e) => update('rockBoreDepthTo', parseFloat(e.target.value) || 0)}
+                placeholder="0.000"
+                value={entry.rockBoreDepthTo === 0 ? '' : entry.rockBoreDepthTo}
+                onChange={(e) => update('rockBoreDepthTo', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                 inputMode="decimal"
               />
             </div>
           </div>
+
+          {/* 8-9. Empty Bore, Concrete Bore (after concrete) */}
+          <div className="group-label">After Concrete</div>
+          <NumberField
+            label="Empty Bore (After Concrete)"
+            value={entry.emptyBoreAfterConcrete}
+            onChange={(v) => update('emptyBoreAfterConcrete', v)}
+          />
+          <NumberField
+            label="Concrete Bore (After Concrete)"
+            value={entry.concreteBoreAfterConcrete}
+            onChange={(v) => update('concreteBoreAfterConcrete', v)}
+          />
         </AccordionSection>
 
         {/* Section 04: Site Personnel */}
-        <AccordionSection num="04" title="Site Personnel" subtitle="Operator, supervisor, crew">
+        <AccordionSection
+          num="04"
+          title="Site Personnel"
+          subtitle="Operator, supervisor, crew"
+          isComplete={personnelComplete}
+        >
           <SelectField label="Machine Operator" options={operators} value={entry.operatorId} onChange={(v) => update('operatorId', v)} />
           <SelectField label="Liner/Bender" options={liners} value={entry.linerId} onChange={(v) => update('linerId', v)} />
           <SelectField label="Fitter" options={fitters} value={entry.fitterId} onChange={(v) => update('fitterId', v)} />
         </AccordionSection>
 
         {/* Section 05: Remarks */}
-        <AccordionSection num="05" title="Remarks" subtitle="Site notes &amp; observations">
+        <AccordionSection
+          num="05"
+          title="Remarks"
+          subtitle="Site notes &amp; observations"
+          isComplete={remarksComplete}
+        >
           <Field label="Remarks">
             <textarea
               rows={5}

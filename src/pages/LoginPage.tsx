@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { authService } from '../services/authService';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
@@ -16,15 +15,26 @@ export const LoginPage: React.FC = () => {
     setError(null);
     setLoading(true);
     try {
-      const result = await login(username, password);
+      const result = await authService.login({ loginId: username, password });
       if (!result.isSucess) {
         setError(result.msg || 'Invalid credentials');
         return;
       }
+
+      // OTP path - server has emailed an OTP to the user's registered email
+      if (result.otpRequired) {
+        navigate('/otp', {
+          state: {
+            emailHint: result.emailId ?? '',
+            loginId: username,
+          },
+        });
+        return;
+      }
+
+      // Direct path - already-trusted device
       navigate('/find-pile', {
-        state: {
-          userId: result.id ?? null,
-        },
+        state: { userId: result.id ?? null },
       });
     } catch (err: any) {
       setError(err.response?.data?.msg || 'Login failed');
@@ -37,15 +47,11 @@ export const LoginPage: React.FC = () => {
     <div id="login" className="screen active">
       <div className="login-inner">
         <div className="login-brand">
-          <div className="brand-mark">F</div>
-          <div>
-            <div className="b1">Foundation Engg. Co.</div>
-            <div className="b2">Bore Log System</div>
-          </div>
+          <img src={'../image/fec-logo.png'} alt="FEC Logo"  />
         </div>
 
         <div className="login-hero">
-          <div className="eyebrow">Sign in</div>
+          <div className="eyebrow">Sign in to Bore Log System</div>
           <h1>
             Every bore, <em>recorded.</em>
           </h1>
@@ -86,7 +92,6 @@ export const LoginPage: React.FC = () => {
               />{' '}
               Remember me
             </label>
-           
           </div>
 
           {error && <div className="error-msg">{error}</div>}
@@ -96,7 +101,12 @@ export const LoginPage: React.FC = () => {
           </button>
 
           <div className="login-foot">FEC · v 2.4.1 · 2526</div>
-          <div className="login-foot">Developed by ARC CompSoft Pvt Ltd. <a className="login-foot" href='https://arc-india.com/' target='_blank'>info@arc-india.com</a></div>
+          <div className="login-foot">
+            Developed by ARC CompSoft Pvt Ltd.{' '}
+            <a className="login-foot" href="https://arc-india.com/" target="_blank" rel="noreferrer">
+              info@arc-india.com
+            </a>
+          </div>
         </form>
       </div>
     </div>

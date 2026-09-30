@@ -1,6 +1,7 @@
 export interface LoginRequest {
   loginId: string;
   password: string;
+  deviceToken?: string | null;
 }
 
 export interface LoginResponse {
@@ -9,6 +10,45 @@ export interface LoginResponse {
   id?: number | null;
   cellNo?: string | null;
   emailId?: string | null;
+  /** When true, the backend has emailed an OTP and the client must redirect to the OTP page. */
+  otpRequired?: boolean;
+  /** Short-lived token that links the OTP page back to this login attempt. */
+  otpSessionId?: string | null;
+}
+
+export interface OtpVerifyRequest {
+  otpSessionId: string;
+  otp: string;
+  rememberDevice: boolean;
+}
+
+export interface OtpVerifyResponse {
+  msg: string;
+  isSuccess: boolean;
+  id?: number | null;
+  cellNo?: string | null;
+  emailId?: string | null;
+  /** Persistent token the client stores so this device can skip OTP on subsequent logins. */
+  deviceToken?: string | null;
+}
+
+export interface OtpResendResponse {
+  msg: string;
+  isSuccess: boolean;
+}
+
+export interface SmtpSettings {
+  host: string;
+  port: number;
+  username: string;
+  password?: string;       // omitted from GET responses for security; required on POST
+  fromAddress: string;
+  fromName: string;
+  useSsl: boolean;
+}
+
+export interface SmtpTestRequest {
+  toAddress: string;
 }
 
 export interface Project {

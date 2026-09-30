@@ -23,6 +23,7 @@ interface NumberFieldProps {
   unit?: string;
   required?: boolean;
   step?: string;
+  placeholder?: string;
 }
 
 export const NumberField: React.FC<NumberFieldProps> = ({
@@ -32,6 +33,7 @@ export const NumberField: React.FC<NumberFieldProps> = ({
   unit = 'mtr',
   required,
   step = '0.001',
+  placeholder = '0.000',
 }) => (
   <Field label={label} required={required}>
     <div className="with-unit">
@@ -39,8 +41,13 @@ export const NumberField: React.FC<NumberFieldProps> = ({
         className="num"
         type="number"
         step={step}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+        // Empty string when value is 0 so the placeholder shows; preserves user's typed values
+        value={value === 0 ? '' : value}
+        placeholder={placeholder}
+        onChange={(e) => {
+          const v = e.target.value;
+          onChange(v === '' ? 0 : parseFloat(v) || 0);
+        }}
         inputMode="decimal"
       />
       <span className="unit-tag">{unit}</span>

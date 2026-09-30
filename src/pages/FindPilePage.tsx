@@ -142,8 +142,11 @@ export const FindPilePage: React.FC = () => {
               className="pile-input"
               placeholder="e.g. P-247"
               value={pileNo}
-              onChange={(e) => setPileNo(e.target.value)}
+              onChange={(e) => setPileNo(e.target.value.toUpperCase())}
               autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              style={{ textTransform: 'uppercase' }}
               onKeyDown={(e) => e.key === 'Enter' && handleUpdate()}
             />
             <div className="input-hint">Enter the pile number you wish to update</div>

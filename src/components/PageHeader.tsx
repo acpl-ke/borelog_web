@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AccountMenu } from './AccountMenu';
 
 interface PageHeaderProps {
   crumb: string;
@@ -7,6 +8,8 @@ interface PageHeaderProps {
   backTo?: string;
   rightIcon?: string;
   onRightClick?: () => void;
+  /** When true (default), the right button opens an account/logout menu. Set false to use onRightClick. */
+  showAccountMenu?: boolean;
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
@@ -15,6 +18,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   backTo,
   rightIcon = '⋯',
   onRightClick,
+  showAccountMenu = true,
 }) => {
   const navigate = useNavigate();
 
@@ -28,9 +32,13 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           <div className="crumb">{crumb}</div>
           <h1>{title}</h1>
         </div>
-        <button className="icon-btn" onClick={onRightClick}>
-          {rightIcon}
-        </button>
+        {showAccountMenu ? (
+          <AccountMenu trigger={rightIcon} />
+        ) : (
+          <button className="icon-btn" onClick={onRightClick}>
+            {rightIcon}
+          </button>
+        )}
       </div>
     </div>
   );
